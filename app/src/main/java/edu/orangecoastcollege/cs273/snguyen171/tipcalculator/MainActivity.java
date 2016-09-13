@@ -1,5 +1,6 @@
 package edu.orangecoastcollege.cs273.snguyen171.tipcalculator;
 
+
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -8,13 +9,18 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.text.NumberFormat;
+
 public class MainActivity extends AppCompatActivity {
+
+    private static NumberFormat currency = NumberFormat.getCurrencyInstance();
+    private static NumberFormat percent = NumberFormat.getPercentInstance();
 
     // Associate the controller with the needed views
     private EditText amountEditText;
     private TextView amountTextView;
-    private TextView tipPercentTextView;
-    private TextView tipAmountTextView;
+    private TextView percentTextView;
+    private TextView tipTextView;
     private TextView totalAmountTextView;
     private SeekBar percentSeekBar;
 
@@ -29,14 +35,19 @@ public class MainActivity extends AppCompatActivity {
         // Connect the controller with the widgets in our app
         amountEditText = (EditText) findViewById(R.id.amountEditText);
         amountTextView = (TextView) findViewById(R.id.amountTextView);
-        tipPercentTextView = (TextView) findViewById(R.id.percentTextView);
-        tipAmountTextView = (TextView) findViewById(R.id.tipTextView);
+        percentTextView = (TextView) findViewById(R.id.percentTextView);
+        tipTextView = (TextView) findViewById(R.id.tipTextView);
         totalAmountTextView = (TextView) findViewById(R.id.totalTextView);
         percentSeekBar = (SeekBar) findViewById(R.id.percentSeekBar);
 
         // Define a listener for the amountEditText (onTextChanged)
         amountEditText.addTextChangedListener(amountTextChangeListener);
 
+        // Define a listener for the percentSeekBar (onProgressChanged)
+        percentSeekBar.setOnSeekBarChangeListener(percentChangedListener);
+
+        // Let's define a default tip percent
+        currentBill.setTipPercent(0.15);
     }
 
     private TextWatcher amountTextChangeListener = new TextWatcher() {
@@ -56,11 +67,50 @@ public class MainActivity extends AppCompatActivity {
             {
                 amountEditText.setText("");
             }
+
+            // No exception, input is valid:
+            // 1) Set the bill amount (amountTextView)
+            amountTextView.setText(currency.format(currentBill.getAmount()));
+            updateViews();
         }
 
         @Override
         public void afterTextChanged(Editable editable) {
             // Do nothing
         }
+    };
+
+    private SeekBar.OnSeekBarChangeListener percentChangedListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+            // Update the model with the new tip amount
+            currentBill.setTipPercent(i / 100.0);
+
+            // Update the percentTextView
+            percentTextView.setText(percent.format(currentBill.getTipPercent()));
+
+            // Update the views
+            updateViews();
+
+
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            // Do nothing
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            // Do nothing
+        }
+    };
+
+    private void updateViews()
+    {
+        // 2) Set the tip amount (tipAmountTextView)
+        tipTextView.setText(currency.format(currentBill.getTipAmount()));
+        // 3) Set the total amount (totalAmountTextView)
+        totalAmountTextView.setText(currency.format(currentBill.getTotalAmount()));
     }
 }

@@ -51,7 +51,7 @@ public class RestaurantBill {
 
     private void recalculateAmounts()
     {
-        mTipAmount = mAmount * mTipAmount;
+        mTipAmount = mAmount * mTipPercent;
         mTotalAmount = mAmount + mTipAmount;
     }
 }
